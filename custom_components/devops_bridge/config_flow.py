@@ -18,6 +18,7 @@ from homeassistant.config_entries import (
     OptionsFlow,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import GitHubApiError, GitHubAuthenticationError, GitHubClient, GitHubError
@@ -141,9 +142,7 @@ class DevopsBridgeConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="repos",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_REPOS): vol.All(
-                        vol.Coerce(list), [vol.In(self._repos)]
-                    ),
+                    vol.Required(CONF_REPOS): cv.multi_select(self._repos),
                 }
             ),
         )
@@ -263,9 +262,8 @@ class DevopsBridgeOptionsFlow(OptionsFlow):
             step_id="init",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_REPOS, default=current): vol.All(
-                        vol.Coerce(list),
-                        [vol.In(self._repos)],
+                    vol.Required(CONF_REPOS, default=current): cv.multi_select(
+                        self._repos
                     ),
                     vol.Required(
                         CONF_UPDATE_INTERVAL, default=current_interval
