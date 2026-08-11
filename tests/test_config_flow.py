@@ -15,6 +15,7 @@ from custom_components.devops_bridge.const import (
     CONF_REPO_MAP,
     CONF_REPOS,
     CONF_TOKEN,
+    CONF_UPDATE_INTERVAL,
     DOMAIN,
 )
 
@@ -154,3 +155,83 @@ async def test_reauth(mock_hass, client, enable_custom_integrations):
     assert result["type"] == "abort"
     assert result["reason"] == "reauth_successful"
     assert mock_hass.config_entries.async_get_entry("entry-id").data[CONF_TOKEN] == "ghp_new"
+
+
+async def test_options_flow_add_repo_and_interval(mock_hass, enable_custom_integrations):
+    """Options can add a repo and change the poll interval."""
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+    from homeassistant.config_entries import SOURCE_USER
+
+    from .conftest import flow_options
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="Work",
+        data=flow_options(repos=["octocat/Hello-World"]),
+        source=SOURCE_USER,
+        entry_id="entry-options",
+    )
+    entry.add_to_hass(mock_hass)
+    await mock_hass.config_entries.async_setup(entry.entry_id)
+
+    with aioresponses() as mocked:
+        mocked.get(
+            URL_REPOS,
+            payload=[
+                repo_payload("Hello-World", "octocat/Hello-World"),
+                repo_payload("github-linguist", "octocat/github-linguist"),
+            ],
+        )
+        result = await mock_hass.config_entries.options.async_init(
+            entry.entry_id
+        )
+        assert result["type"] == "form"
+        assert result["step_id"] == "init"
+
+        result = await mock_hass.config_entries.options.async_configure(
+            result["flow_id"],
+            {
+                CONF_REPOS: [
+                    "octocat/Hello-World",
+                    "octocat/github-linguist",
+                ],
+                CONF_UPDATE_INTERVAL: 15,
+            },
+        )
+    assert result["type"] == "create_entry"
+    updated = mock_hass.config_entries.async_get_entry("entry-options").options
+    assert updated[CONF_REPOS] == [
+        "octocat/Hello-World",
+        "octocat/github-linguist",
+    ]
+    assert updated[CONF_UPDATE_INTERVAL] == 15
+
+
+async def test_options_flow_fallback_when_api_unavailable(
+    mock_hass, enable_custom_integrations
+):
+    """Options stay usable (existing repos only) if the repo fetch fails."""
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+    from homeassistant.config_entries import SOURCE_USER
+
+    from .conftest import flow_options
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="Work",
+        data=flow_options(repos=["octocat/Hello-World"]),
+        source=SOURCE_USER,
+        entry_id="entry-options-fallback",
+    )
+    entry.add_to_hass(mock_hass)
+    await mock_hass.config_entries.async_setup(entry.entry_id)
+
+    with aioresponses() as mocked:
+        mocked.get(URL_REPOS, status=500)
+        result = await mock_hass.config_entries.options.async_init(
+            entry.entry_id
+        )
+        assert result["type"] == "form"
+        assert result["step_id"] == "init"

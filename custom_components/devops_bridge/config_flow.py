@@ -17,17 +17,19 @@ from homeassistant.config_entries import (
     ConfigFlowResult,
     OptionsFlow,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import GitHubApiError, GitHubAuthenticationError, GitHubClient
+from .api import GitHubApiError, GitHubAuthenticationError, GitHubClient, GitHubError
 from .const import (
     CONF_ACCOUNT,
     CONF_LOGIN,
     CONF_REPO_MAP,
     CONF_REPOS,
     CONF_TOKEN,
+    CONF_UPDATE_INTERVAL,
     DOMAIN,
+    INTERVAL_CHOICES,
 )
 
 STEP_USER_SCHEMA = vol.Schema(
@@ -211,6 +213,12 @@ class DevopsBridgeConfigFlow(ConfigFlow, domain=DOMAIN):
             repo_map[repo] = slug
         return repo_map
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        """Return the options flow for this integration."""
+        return DevopsBridgeOptionsFlow(config_entry)
+
 
 def _slug(value: str) -> str:
     """Deterministic repo slug: lowercase, `-` -> `_`, other non-alnum -> `_`."""
@@ -220,34 +228,62 @@ def _slug(value: str) -> str:
 
 
 class DevopsBridgeOptionsFlow(OptionsFlow):
-    """Options flow: change which repos are monitored."""
+    """Options flow: change monitored repos and the poll schedule."""
 
     def __init__(self, entry: ConfigEntry) -> None:
         super().__init__()
         self._entry = entry
+        self._repos: dict[str, str] = {}
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         if user_input is not None:
             selected = list(user_input[CONF_REPOS])
+            interval = user_input[CONF_UPDATE_INTERVAL]
             return self.async_create_entry(
                 data={
                     CONF_REPOS: selected,
                     CONF_REPO_MAP: self._build_map(selected),
+                    CONF_UPDATE_INTERVAL: interval,
                 }
             )
-        repos = list(self._entry.data.get(CONF_REPOS, []))
+        await self._async_load_repos()
+        if not self._repos:
+            # Token-visible lookup failed (e.g. token scoped elsewhere): fall
+            # back to the currently monitored set so options stay usable.
+            self._repos = {
+                repo: repo for repo in self._entry.data.get(CONF_REPOS, [])
+            }
+        current = list(self._entry.data.get(CONF_REPOS, []))
+        current_interval = self._entry.options.get(
+            CONF_UPDATE_INTERVAL, INTERVAL_CHOICES[1]
+        )
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_REPOS, default=repos): vol.All(
-                        vol.Coerce(list), [vol.In(self._entry.data[CONF_REPOS])]
+                    vol.Required(CONF_REPOS, default=current): vol.All(
+                        vol.Coerce(list),
+                        [vol.In(self._repos)],
                     ),
+                    vol.Required(
+                        CONF_UPDATE_INTERVAL, default=current_interval
+                    ): vol.In(INTERVAL_CHOICES),
                 }
             ),
         )
+
+    async def _async_load_repos(self) -> None:
+        """Load the token-visible repos for the entry (best-effort)."""
+        token = self._entry.data.get(CONF_TOKEN, "")
+        try:
+            client = build_client(self.hass, token)
+            repos = await client.async_get_repos()
+        except GitHubError:
+            self._repos = {}
+            return
+        self._repos = {str(repo["full_name"]): str(repo["full_name"]) for repo in repos}
 
     def _build_map(self, selected: list[str]) -> dict[str, str]:
         seen: set[str] = set()
@@ -262,7 +298,3 @@ class DevopsBridgeOptionsFlow(OptionsFlow):
             seen.add(slug)
             repo_map[repo] = slug
         return repo_map
-
-
-async def async_get_options_flow(entry: ConfigEntry) -> OptionsFlow:
-    return DevopsBridgeOptionsFlow(entry)

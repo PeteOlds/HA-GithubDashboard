@@ -29,6 +29,7 @@ from .const import (
     CONF_LOGIN,
     CONF_REPO_MAP,
     CONF_REPOS,
+    CONF_UPDATE_INTERVAL,
     DOMAIN,
     UPDATE_INTERVAL,
 )
@@ -59,7 +60,8 @@ class DevopsBridgeCoordinator(DataUpdateCoordinator[DevopsBridgeData]):
         self.repos: list[str] = list(entry.data.get(CONF_REPOS, []))
         self._repo_slugs: dict[str, str] = dict(entry.data.get(CONF_REPO_MAP, {}))
         self._login: str = entry.data.get(CONF_LOGIN, "")
-        interval: timedelta = entry.options.get("update_interval", UPDATE_INTERVAL)
+        interval_int: int = entry.options.get(CONF_UPDATE_INTERVAL, UPDATE_INTERVAL.seconds // 60)
+        interval = timedelta(minutes=interval_int)
         super().__init__(
             hass,
             _LOGGER,

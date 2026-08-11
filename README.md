@@ -12,9 +12,6 @@ expects is specified in the project's design vault (see the Integration Guide,
 `ENTITY_CONTRACT.md`, `INTEGRATION_SPEC.md`, and `dashboard/GithubDashboard.yaml`
 for the authoritative agreement the code must match).
 
-> Status: scaffold (pre-release). The integration is being built to match the
-> contract; entities do not exist until the first release is tagged.
-
 ## Features
 
 - Multiple GitHub accounts; one config entry per account.
@@ -25,6 +22,7 @@ for the authoritative agreement the code must match).
   ci, latest_release, release_date, pushed_at).
 - Metric sensors for tiles, plus a `binary_sensor` for CI on/off.
 - Per-account "recent activity" feed (markdown text as state).
+- Configurable poll interval (5–60 min) and repo allowlist via Options.
 - Read-only by design: the only action in the Dashboard is `tap_action: url`.
 
 ## Installation
@@ -52,6 +50,14 @@ Use a **fine-grained Personal Access Token**, read-only:
 
 Restrict it to the repositories you want to monitor. The token is stored in the
 config entry and never logged or committed.
+
+### Adjusting later
+
+From Settings → Devices & services → DevOps Bridge → **Options** you can:
+
+- Change which repositories are monitored (add or remove from the ones the
+  token can see).
+- Change the poll interval (default 10 minutes; 5–60 minutes available).
 
 ## Development
 

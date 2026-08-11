@@ -41,15 +41,16 @@
       "reauth_missing_entry": "The config entry to reauthenticate was not found."
     }
   },
-  "options": {
-    "step": {
-      "init": {
-        "title": "DevOps Bridge options",
-        "description": "Adjust which repositories are monitored.",
-        "data": {
-          "repos": "Repositories"
-        }
-      }
+"options": {
+  "step": {
+   "init": {
+    "title": "DevOps Bridge options",
+    "description": "Adjust which repositories are monitored and how often they are polled.",
+    "data": {
+     "repos": "Repositories",
+     "update_interval": "Poll interval (minutes)"
     }
+   }
   }
+ }
 }

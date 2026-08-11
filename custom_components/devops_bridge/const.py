@@ -12,6 +12,10 @@ CONF_TOKEN = "token"
 CONF_LOGIN = "login"
 CONF_REPOS = "repos"
 CONF_REPO_MAP = "repo_map"
+CONF_UPDATE_INTERVAL = "update_interval"
+
+# Options-flow choices for the poll interval (minutes).
+INTERVAL_CHOICES = [5, 10, 15, 30, 60]
 
 UPDATE_INTERVAL = timedelta(minutes=10)
 CONNECTION_TIMEOUT = 10
