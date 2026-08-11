@@ -51,6 +51,18 @@ Use a **fine-grained Personal Access Token**, read-only:
 Restrict it to the repositories you want to monitor. The token is stored in the
 config entry and never logged or committed.
 
+### Creating the token
+
+1. GitHub → **Settings** → **Developer settings** → **Personal access tokens**
+   → **Fine-grained tokens** → **Generate new token**.
+2. Name it (e.g. `Home Assistant (Work)`), set a short expiry, and choose
+   **Only select repositories** for the repos you want to monitor.
+3. Under **Permissions** set exactly these to **Read-only** (all others stay at
+   *No access*): Actions, Contents, Issues, Pull requests, Metadata.
+4. **Generate token** and copy it immediately — GitHub shows it only once.
+5. In HA: Settings → Devices & services → **Add integration** → **DevOps
+   Bridge**, enter the account name, paste the token, select repos.
+
 ### Adjusting later
 
 From Settings → Devices & services → DevOps Bridge → **Options** you can:
@@ -71,6 +83,26 @@ pytest
 ```
 
 Tests use mocked HTTP fixtures — no live GitHub account required.
+
+### Dev test box (Docker)
+
+A dedicated Home Assistant container on port **9123** (separate from any live
+instance), with this repo's `custom_components` bind-mounted in so edits appear
+without rebuilding:
+
+```bash
+docker run -d \
+  --name ha-dev --restart unless-stopped \
+  -p 9123:8123 \
+  -v /mnt/General/ha-dev/config:/config \
+  -v /mnt/General/OpenCode/HA-GithubDashboard/custom_components/devops_bridge:/config/custom_components/devops_bridge \
+  -e TZ=Pacific/Auckland \
+  ghcr.io/home-assistant/home-assistant:stable
+```
+
+Open `http://localhost:9123` to complete onboarding. The integration shows up
+under Add integration → **DevOps Bridge**; a smoke test with a throwaway
+read-only PAT is the release gate.
 
 ## Documentation
 
