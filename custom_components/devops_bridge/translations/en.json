@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "DevOps Bridge",
+        "description": "Add a GitHub account to monitor.",
+        "data": {
+          "account": "Account name (friendly label, e.g. Work or Personal)"
+        }
+      },
+      "token": {
+        "title": "Personal access token",
+        "description": "Fine-grained, read-only PAT. Recommended scopes: Actions: Read, Contents: Read, Issues: Read, Pull requests: Read, Metadata: Read.",
+        "data": {
+          "token": "Personal access token"
+        }
+      },
+      "repos": {
+        "title": "Repositories",
+        "description": "Select the repositories to monitor. Only selected repos create entities.",
+        "data": {
+          "repos": "Repositories"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate DevOps Bridge",
+        "description": "The token for {name} is invalid or expired. Provide a new fine-grained, read-only PAT.",
+        "data": {
+          "token": "Personal access token"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to GitHub. Check the token and network.",
+      "invalid_auth": "Invalid token or insufficient scopes.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This GitHub account is already configured.",
+      "reauth_successful": "The account has been reauthenticated.",
+      "reauth_missing_entry": "The config entry to reauthenticate was not found."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "DevOps Bridge options",
+        "description": "Adjust which repositories are monitored.",
+        "data": {
+          "repos": "Repositories"
+        }
+      }
+    }
+  }
+}

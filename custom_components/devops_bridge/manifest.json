@@ -1,0 +1,12 @@
+{
+  "domain": "devops_bridge",
+  "name": "DevOps Bridge",
+  "version": "0.1.0",
+  "documentation": "https://github.com/PeteOlds/HA-GithubDashboard",
+  "issue_tracker": "https://github.com/PeteOlds/HA-GithubDashboard/issues",
+  "codeowners": ["@PeteOlds"],
+  "config_flow": true,
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "homeassistant": "2026.5.0"
+}
