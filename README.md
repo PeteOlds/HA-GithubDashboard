@@ -99,12 +99,6 @@ Open `http://localhost:9123` to complete onboarding. The integration shows up
 under Add integration → **GitHub Repo Monitor**; a smoke test with a throwaway
 read-only PAT is the release gate.
 
-## Documentation
-
-The entity contract, integration architecture, and dashboard design live in the
-project's Obsidian vault under `github/` and are referenced from `AGENTS.md`
-there. This repository is the code home for `custom_components/devops_bridge/`.
-
 ## Licence
 
 Apache-2.0 — see [LICENSE](LICENSE).
