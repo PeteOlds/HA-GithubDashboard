@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e ".[dev]"
+          pip install --config-settings editable_mode=compat -e ".[dev]"
 
       - name: Ruff
         run: ruff check .
