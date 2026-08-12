@@ -3,7 +3,7 @@
 from datetime import timedelta
 
 DOMAIN = "devops_bridge"
-NAME = "DevOps Bridge"
+NAME = "GitHub Repo Monitor"
 
 PLATFORMS = ["binary_sensor", "sensor"]
 

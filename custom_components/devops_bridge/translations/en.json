@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "DevOps Bridge",
+        "title": "GitHub Repo Monitor",
         "description": "Add a GitHub account to monitor.",
         "data": {
           "account": "Account name (friendly label, e.g. Work or Personal)"
@@ -23,7 +23,7 @@
         }
       },
       "reauth_confirm": {
-        "title": "Reauthenticate DevOps Bridge",
+        "title": "Reauthenticate GitHub Repo Monitor",
         "description": "The token for {name} is invalid or expired. Provide a new fine-grained, read-only PAT.",
         "data": {
           "token": "Personal access token"
@@ -44,7 +44,7 @@
 "options": {
   "step": {
    "init": {
-    "title": "DevOps Bridge options",
+    "title": "GitHub Repo Monitor options",
     "description": "Adjust which repositories are monitored and how often they are polled.",
     "data": {
      "repos": "Repositories",

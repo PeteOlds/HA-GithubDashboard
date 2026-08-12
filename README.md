@@ -1,4 +1,4 @@
-# DevOps Bridge
+# GitHub Repo Monitor
 
 A read-only [Home Assistant](https://www.home-assistant.io/) custom integration
 for GitHub that polls repository health across **multiple accounts** and feeds a
@@ -35,7 +35,7 @@ Requires **Home Assistant Core 2026.5 or later**.
    (`dashboard/GithubDashboard.yaml`) and merge
    `dashboard/TemplateSensors.yaml` into `configuration.yaml` for the overview
    aggregates.
-3. Settings → Devices & services → Add integration → **DevOps Bridge**.
+3. Settings → Devices & services → Add integration → **GitHub Repo Monitor**.
 4. Enter an account name (a friendly label, e.g. `Work`), then a read-only PAT.
 
 ### Token scopes
@@ -65,7 +65,7 @@ config entry and never logged or committed.
 
 ### Adjusting later
 
-From Settings → Devices & services → DevOps Bridge → **Options** you can:
+From Settings → Devices & services → GitHub Repo Monitor → **Options** you can:
 
 - Change which repositories are monitored (add or remove from the ones the
   token can see).
@@ -101,7 +101,7 @@ docker run -d \
 ```
 
 Open `http://localhost:9123` to complete onboarding. The integration shows up
-under Add integration → **DevOps Bridge**; a smoke test with a throwaway
+under Add integration → **GitHub Repo Monitor**; a smoke test with a throwaway
 read-only PAT is the release gate.
 
 ## Documentation
