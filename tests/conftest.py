@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import inspect
+
 import aiohttp
 import pytest
 from aiohttp import ClientResponse
@@ -14,44 +16,25 @@ from custom_components.devops_bridge.const import (
     CONF_TOKEN,
 )
 
+original_init = ClientResponse.__init__
 
-def _client_response_init(
-    self,
-    method,
-    url,
-    *,
-    writer,
-    continue100,
-    timer,
-    request_info,
-    traces,
-    loop,
-    session,
-    stream_writer=None,
-):
-    """Compat shim: aioresponses 0.7.9 predates aiohttp's stream_writer kwarg."""
+_ACCEPTS_STREAM_WRITER = "stream_writer" in inspect.signature(original_init).parameters
+
+
+def _client_response_init(self, *args, **kwargs):
+    """Compat shim bridging aiohttp versions that add/remove the stream_writer kwarg."""
 
     class _DummyStreamWriter:
         output_size = 0
 
-    if stream_writer is None and writer is None:
-        stream_writer = _DummyStreamWriter()
-    original_init(
-        self,
-        method,
-        url,
-        writer=writer,
-        continue100=continue100,
-        timer=timer,
-        request_info=request_info,
-        traces=traces,
-        loop=loop,
-        session=session,
-        stream_writer=stream_writer,
-    )
+    stream_writer = kwargs.pop("stream_writer", None)
+    if _ACCEPTS_STREAM_WRITER:
+        if stream_writer is None:
+            stream_writer = _DummyStreamWriter()
+        kwargs["stream_writer"] = stream_writer
+    original_init(self, *args, **kwargs)
 
 
-original_init = ClientResponse.__init__
 ClientResponse.__init__ = _client_response_init
 
 

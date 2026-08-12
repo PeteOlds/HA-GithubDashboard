@@ -1,11 +1,11 @@
 {
   "domain": "devops_bridge",
   "name": "GitHub Repo Monitor",
-  "version": "0.3.1",
-  "documentation": "https://github.com/PeteOlds/HA-GithubDashboard",
-  "issue_tracker": "https://github.com/PeteOlds/HA-GithubDashboard/issues",
   "codeowners": ["@PeteOlds"],
   "config_flow": true,
+  "documentation": "https://github.com/PeteOlds/HA-GithubDashboard",
   "integration_type": "hub",
-  "iot_class": "cloud_polling"
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/PeteOlds/HA-GithubDashboard/issues",
+  "version": "0.3.1"
 }
