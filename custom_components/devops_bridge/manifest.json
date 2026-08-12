@@ -1,12 +1,11 @@
 {
   "domain": "devops_bridge",
   "name": "GitHub Repo Monitor",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "documentation": "https://github.com/PeteOlds/HA-GithubDashboard",
   "issue_tracker": "https://github.com/PeteOlds/HA-GithubDashboard/issues",
   "codeowners": ["@PeteOlds"],
   "config_flow": true,
   "integration_type": "hub",
-  "iot_class": "cloud_polling",
-  "homeassistant": "2026.5.0"
+  "iot_class": "cloud_polling"
 }

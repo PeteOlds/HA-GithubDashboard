@@ -54,7 +54,9 @@ async def test_async_get_repos_paginated(client):
 async def test_async_get_ci_ok(client):
     with aioresponses() as mocked:
         mocked.get(
-            re.compile(r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"),
+            re.compile(
+                r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"
+            ),
             payload=ci_runs_payload(conclusion="success"),
         )
         status = await client.async_get_ci_status("octocat", "Hello-World", "main")
@@ -64,7 +66,9 @@ async def test_async_get_ci_ok(client):
 async def test_async_get_ci_fail(client):
     with aioresponses() as mocked:
         mocked.get(
-            re.compile(r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"),
+            re.compile(
+                r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"
+            ),
             payload=ci_runs_payload(conclusion="failure"),
         )
         status = await client.async_get_ci_status("octocat", "Hello-World", "main")
@@ -74,7 +78,9 @@ async def test_async_get_ci_fail(client):
 async def test_async_get_ci_running(client):
     with aioresponses() as mocked:
         mocked.get(
-            re.compile(r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"),
+            re.compile(
+                r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"
+            ),
             payload=ci_runs_payload(conclusion=None, status="in_progress"),
         )
         status = await client.async_get_ci_status("octocat", "Hello-World", "main")
@@ -84,7 +90,9 @@ async def test_async_get_ci_running(client):
 async def test_async_get_ci_no_runs_is_idle(client):
     with aioresponses() as mocked:
         mocked.get(
-            re.compile(r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"),
+            re.compile(
+                r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"
+            ),
             payload={"total_count": 0, "workflow_runs": []},
         )
         status = await client.async_get_ci_status("octocat", "Hello-World", "main")
@@ -94,7 +102,9 @@ async def test_async_get_ci_no_runs_is_idle(client):
 async def test_async_get_ci_actions_absent_is_idle(client):
     with aioresponses() as mocked:
         mocked.get(
-            re.compile(r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"),
+            re.compile(
+                r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"
+            ),
             status=404,
         )
         status = await client.async_get_ci_status("octocat", "Hello-World", "main")
@@ -107,9 +117,7 @@ async def test_async_get_latest_release(client):
             "https://api.github.com/repos/octocat/Hello-World/releases/latest",
             payload=releases_payload("v1.2.3"),
         )
-        tag, published = await client.async_get_latest_release(
-            "octocat", "Hello-World"
-        )
+        tag, published = await client.async_get_latest_release("octocat", "Hello-World")
     assert tag == "v1.2.3"
     assert published == "2026-05-01T12:00:00Z"
 
@@ -120,9 +128,7 @@ async def test_async_get_latest_release_none(client):
             "https://api.github.com/repos/octocat/Hello-World/releases/latest",
             status=404,
         )
-        tag, published = await client.async_get_latest_release(
-            "octocat", "Hello-World"
-        )
+        tag, published = await client.async_get_latest_release("octocat", "Hello-World")
     assert tag == ""
     assert published == ""
 

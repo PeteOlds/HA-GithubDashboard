@@ -70,7 +70,9 @@ async def test_coordinator_refresh_repo(mock_hass, client):
             payload=[{"number": 1}],
         )
         mocked.get(
-            re.compile(r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"),
+            re.compile(
+                r"https://api\.github\.com/repos/octocat/Hello-World/actions/runs.*"
+            ),
             payload=ci_runs_payload(conclusion="success"),
         )
         mocked.get(
@@ -114,9 +116,7 @@ async def test_coordinator_missing_repo_marks_unavailable(mock_hass, client):
     coordinator = DevopsBridgeCoordinator(mock_hass, entry, client, "work")
 
     with aioresponses() as mocked:
-        mocked.get(
-            "https://api.github.com/repos/octocat/Hello-World", status=404
-        )
+        mocked.get("https://api.github.com/repos/octocat/Hello-World", status=404)
         data = await coordinator._async_update_data()
 
     repo = data.repos["octocat/Hello-World"]
@@ -131,8 +131,6 @@ async def test_coordinator_auth_failed(mock_hass, client):
     coordinator = DevopsBridgeCoordinator(mock_hass, entry, client, "work")
 
     with aioresponses() as mocked:
-        mocked.get(
-            "https://api.github.com/repos/octocat/Hello-World", status=401
-        )
+        mocked.get("https://api.github.com/repos/octocat/Hello-World", status=401)
         with pytest.raises(ConfigEntryAuthFailed):
             await coordinator._async_update_data()

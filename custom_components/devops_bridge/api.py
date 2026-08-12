@@ -255,9 +255,7 @@ class GitHubClient:
                 return CI_FAIL
         return CI_IDLE
 
-    async def async_get_latest_release(
-        self, owner: str, repo: str
-    ) -> tuple[str, str]:
+    async def async_get_latest_release(self, owner: str, repo: str) -> tuple[str, str]:
         """Return (tag, published_at). (\"\", \"\") when no release exists."""
         try:
             _, data = await self._request(
@@ -313,5 +311,5 @@ def _format_isodate(value: Any) -> str:
         return datetime.fromisoformat(str(value).replace("Z", "+00:00")).strftime(
             "%Y-%m-%d %H:%M"
         )
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return str(value)

@@ -251,9 +251,7 @@ class DevopsBridgeOptionsFlow(OptionsFlow):
         if not self._repos:
             # Token-visible lookup failed (e.g. token scoped elsewhere): fall
             # back to the currently monitored set so options stay usable.
-            self._repos = {
-                repo: repo for repo in self._entry.data.get(CONF_REPOS, [])
-            }
+            self._repos = {repo: repo for repo in self._entry.data.get(CONF_REPOS, [])}
         current = list(self._entry.data.get(CONF_REPOS, []))
         current_interval = self._entry.options.get(
             CONF_UPDATE_INTERVAL, INTERVAL_CHOICES[1]

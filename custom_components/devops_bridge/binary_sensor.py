@@ -32,9 +32,7 @@ class RepoCISensor(RepoDeviceEntity, BinarySensorEntity):
         self.entity_id = (
             f"binary_sensor.{coordinator.account_slug}_{self._repo_slug}_ci_ok"
         )
-        self._attr_unique_id = (
-            f"{coordinator.account_slug}_{self._repo_slug}_ci_ok"
-        )
+        self._attr_unique_id = f"{coordinator.account_slug}_{self._repo_slug}_ci_ok"
         self._attr_name = "CI"
 
     @property

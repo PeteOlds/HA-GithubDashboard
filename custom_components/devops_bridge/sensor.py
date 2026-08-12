@@ -26,24 +26,12 @@ from .coordinator import DevopsBridgeCoordinator
 from .entity import DevopsBridgeEntity, RepoDeviceEntity
 
 _DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
-    SensorEntityDescription(
-        key="open_pulls", icon="mdi:source-pull"
-    ),
-    SensorEntityDescription(
-        key="open_issues", icon="mdi:alert-circle"
-    ),
-    SensorEntityDescription(
-        key="stars", icon="mdi:star"
-    ),
-    SensorEntityDescription(
-        key="forks", icon="mdi:source-fork"
-    ),
-    SensorEntityDescription(
-        key="watchers", icon="mdi:eye-outline"
-    ),
-    SensorEntityDescription(
-        key="latest_release", icon="mdi:tag"
-    ),
+    SensorEntityDescription(key="open_pulls", icon="mdi:source-pull"),
+    SensorEntityDescription(key="open_issues", icon="mdi:alert-circle"),
+    SensorEntityDescription(key="stars", icon="mdi:star"),
+    SensorEntityDescription(key="forks", icon="mdi:source-fork"),
+    SensorEntityDescription(key="watchers", icon="mdi:eye-outline"),
+    SensorEntityDescription(key="latest_release", icon="mdi:tag"),
     SensorEntityDescription(
         key="release_date",
         device_class=SensorDeviceClass.TIMESTAMP,
@@ -76,7 +64,7 @@ def _parse_timestamp(value: str) -> datetime | None:
         return None
     try:
         return datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return None
 
 

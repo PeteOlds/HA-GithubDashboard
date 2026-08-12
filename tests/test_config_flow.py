@@ -154,10 +154,15 @@ async def test_reauth(mock_hass, client, enable_custom_integrations):
         )
     assert result["type"] == "abort"
     assert result["reason"] == "reauth_successful"
-    assert mock_hass.config_entries.async_get_entry("entry-id").data[CONF_TOKEN] == "ghp_new"
+    assert (
+        mock_hass.config_entries.async_get_entry("entry-id").data[CONF_TOKEN]
+        == "ghp_new"
+    )
 
 
-async def test_options_flow_add_repo_and_interval(mock_hass, enable_custom_integrations):
+async def test_options_flow_add_repo_and_interval(
+    mock_hass, enable_custom_integrations
+):
     """Options can add a repo and change the poll interval."""
     from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -183,9 +188,7 @@ async def test_options_flow_add_repo_and_interval(mock_hass, enable_custom_integ
                 repo_payload("github-linguist", "octocat/github-linguist"),
             ],
         )
-        result = await mock_hass.config_entries.options.async_init(
-            entry.entry_id
-        )
+        result = await mock_hass.config_entries.options.async_init(entry.entry_id)
         assert result["type"] == "form"
         assert result["step_id"] == "init"
 
@@ -230,8 +233,6 @@ async def test_options_flow_fallback_when_api_unavailable(
 
     with aioresponses() as mocked:
         mocked.get(URL_REPOS, status=500)
-        result = await mock_hass.config_entries.options.async_init(
-            entry.entry_id
-        )
+        result = await mock_hass.config_entries.options.async_init(entry.entry_id)
         assert result["type"] == "form"
         assert result["step_id"] == "init"

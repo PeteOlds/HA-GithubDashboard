@@ -60,7 +60,9 @@ class DevopsBridgeCoordinator(DataUpdateCoordinator[DevopsBridgeData]):
         self.repos: list[str] = list(entry.data.get(CONF_REPOS, []))
         self._repo_slugs: dict[str, str] = dict(entry.data.get(CONF_REPO_MAP, {}))
         self._login: str = entry.data.get(CONF_LOGIN, "")
-        interval_int: int = entry.options.get(CONF_UPDATE_INTERVAL, UPDATE_INTERVAL.seconds // 60)
+        interval_int: int = entry.options.get(
+            CONF_UPDATE_INTERVAL, UPDATE_INTERVAL.seconds // 60
+        )
         interval = timedelta(minutes=interval_int)
         super().__init__(
             hass,
@@ -94,8 +96,7 @@ class DevopsBridgeCoordinator(DataUpdateCoordinator[DevopsBridgeData]):
         """Compose the per-account markdown feed (best-effort, never fatal)."""
         try:
             pairs = [
-                (repo.partition("/")[0], repo.partition("/")[2])
-                for repo in self.repos
+                (repo.partition("/")[0], repo.partition("/")[2]) for repo in self.repos
             ]
             return await self.client.async_get_activity_markdown(
                 self._login, repos=pairs
@@ -109,7 +110,7 @@ class DevopsBridgeCoordinator(DataUpdateCoordinator[DevopsBridgeData]):
             owner, _, repo_name = repo.partition("/")
             try:
                 result[repo] = await self._async_update_repo(owner, repo_name)
-            except (GitHubAuthenticationError, GitHubRateLimitError):
+            except GitHubAuthenticationError, GitHubRateLimitError:
                 # Account-wide conditions: bail out so the whole entry can
                 # transition to reauth / backoff. Never mark individual repos.
                 raise
