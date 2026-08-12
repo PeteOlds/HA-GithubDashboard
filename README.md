@@ -7,11 +7,6 @@ Lovelace dashboard (`GithubDashboard.yaml`).
 Works with [flex-table-card](https://github.com/custom-cards/flex-table-card) to
 render one row per repository with click-through to GitHub.
 
-**This is a design-first deliverable.** The entity contract the dashboard
-expects is specified in the project's design vault (see the Integration Guide,
-`ENTITY_CONTRACT.md`, `INTEGRATION_SPEC.md`, and `dashboard/GithubDashboard.yaml`
-for the authoritative agreement the code must match).
-
 ## Features
 
 - Multiple GitHub accounts; one config entry per account.
