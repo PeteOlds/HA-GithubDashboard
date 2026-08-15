@@ -26,12 +26,10 @@ Requires **Home Assistant Core 2026.5 or later**.
 
 1. Copy `custom_components/devops_bridge/` into your
    `config/custom_components/devops_bridge/` (or install via HACS).
-2. The Lovelace dashboard and its overview template sensors are design
-   deliverables kept in the Obsidian vault (`github/README-GithubDashboard.md`),
-   not in this repo. Follow that guide to load the dashboard; the short version:
-   install `custom-cards/flex-table-card` via HACS, add
+2. Load the companion dashboard: follow `dashboard/README.md` in this repo
+   (install `custom-cards/flex-table-card` via HACS, add
    `template: !include TemplateSensors.yaml` to `configuration.yaml`, and create
-   the dashboard from the `views:` block in `GithubDashboard.yaml`.
+   the dashboard from the `views:` block in `dashboard/GithubDashboard.yaml`).
 3. Settings → Devices & services → Add integration → **GitHub Repo Monitor**.
 4. Enter an account name (a friendly label, e.g. `Work`), then a read-only PAT.
 

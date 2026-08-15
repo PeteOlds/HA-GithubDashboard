@@ -1,0 +1,69 @@
+# =============================================================================
+# Overview aggregates — HA template sensors (NOT integration entities)
+#
+# The devops_bridge integration is per-repo only and does NOT produce the
+# sensor.github_* aggregates. Those live here as HA template sensors, merged
+# into configuration.yaml — they cannot live in the Lovelace YAML.
+#
+# Merge options:
+#   1. Copy the block below into your configuration.yaml, or
+#   2. `template: !include TemplateSensors.yaml` from configuration.yaml
+#      (this file's top level is the `template:` list, NOT a `template:` key —
+#      the include adds the list under the `template:` option itself).
+#
+# Each template sums an attribute across the per-repo summary sensors the
+# integration exposes (sensor.{account}_{repo}_repo). Entity ids follow the
+# dashboard contract: sensor.github_total_open_pulls / _open_issues /
+# _total_stars / sensor.github_attention.
+#
+# Requires HA Core 2026.5+ (unique_id on template sensors). Change the `repo`
+# name check only if you use a different summary-sensor suffix.
+# =============================================================================
+
+- sensor:
+      - name: "GitHub Total Open Pulls"
+        unique_id: devops_bridge_github_total_open_pulls
+        state: >-
+          {% set ns = namespace(t = 0) %}
+          {% for s in states.sensor if s.entity_id.endswith('_repo')
+                and s.attributes.get('open_pulls') is not none %}
+            {% set ns.t = ns.t + (s.attributes.open_pulls | int) %}
+          {% endfor %}
+          {{ ns.t }}
+
+      - name: "GitHub Total Open Issues"
+        unique_id: devops_bridge_github_total_open_issues
+        state: >-
+          {% set ns = namespace(t = 0) %}
+          {% for s in states.sensor if s.entity_id.endswith('_repo')
+                and s.attributes.get('open_issues') is not none %}
+            {% set ns.t = ns.t + (s.attributes.open_issues | int) %}
+          {% endfor %}
+          {{ ns.t }}
+
+      - name: "GitHub Total Stars"
+        unique_id: devops_bridge_github_total_stars
+        state: >-
+          {% set ns = namespace(t = 0) %}
+          {% for s in states.sensor if s.entity_id.endswith('_repo')
+                and s.attributes.get('stars') is not none %}
+            {% set ns.t = ns.t + (s.attributes.stars | int) %}
+          {% endfor %}
+          {{ ns.t }}
+
+      - name: "GitHub Attention"
+        unique_id: devops_bridge_github_attention
+        state: >-
+          {% set ns = namespace(n = 0) %}
+          {% for s in states.sensor if s.entity_id.endswith('_repo') %}
+            {% set fail = s.attributes.get('ci') == 'fail' %}
+            {% set stale = false %}
+            {% if s.attributes.get('pushed_at') %}
+              {% set age = now() - (s.attributes.pushed_at | as_datetime) %}
+              {% set stale = age.days > 30 %}
+            {% endif %}
+            {% if fail or stale %}
+              {% set ns.n = ns.n + 1 %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.n }}

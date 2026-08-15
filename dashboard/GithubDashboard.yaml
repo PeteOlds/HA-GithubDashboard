@@ -1,0 +1,283 @@
+# =============================================================================
+# GitHub dashboard for Home Assistant (Lovelace)
+#
+# Requires one net-new HACS card: flex-table-card (HACS -> Frontend -> flex-table)
+#   https://github.com/custom-cards/flex-table-card
+#
+# Consumption contract (from the future "devops_bridge" integration):
+#   One DEVICE per {account}/{repo}, with a per-repo "repo summary" sensor:
+#     sensor.{account}_{repo}_repo
+#       attributes:
+#         account       - account slug, e.g. "work"
+#         repository    - repo short name, e.g. "homeassistant-config"
+#         url           - https://github.com/... (used for click-through)
+#         stars forks watchers open_issues open_pulls - int counts
+#         ci            - "ok" | "fail" | "running" | "idle"
+#         latest_release, release_date, pushed_at
+#   Per-metric sensors (used in per-repo detail cards):
+#     sensor.{account}_{repo}_open_pulls / _open_issues / _stars / _forks
+#     sensor.{account}_{repo}_latest_release / _release_date / _pushed_at
+#     binary_sensor.{account}_{repo}_ci_ok   (device_class: problem;
+#       ON = CI FAILING, OFF = passing "OK" — HA does not invert problem states)
+#   Per-account aggregate + feed:
+#     sensor.{account}_recent_activity   (feed state truncated ≤200; full
+#       markdown in the `feed` attribute — cards read state_attr)
+#   Per-dashboard aggregates (Overview) — HA template sensors, NOT
+#   integration-produced; defined in dashboard/TemplateSensors.yaml:
+#     sensor.github_total_open_pulls / _open_issues / _total_stars / _attention
+#
+# IMPORTANT: All entity ids below are PLACEHOLDERS following the contract.
+# Account hooks are "personal" and "work"; sample values are synthetic and
+# labelled. Replace slugs/entities once the integration exists.
+#
+# Installation:
+#   Storage-mode dashboard (recommended): create a dashboard, open Raw config
+#   editor, and paste from `title: GitHub` onward (skip the `resources:` block —
+#   in storage mode resources are registered via HACS, not in the config).
+#   YAML-mode dashboard: paste the whole file into your frontend config, and the
+#   resources block below applies.
+# =============================================================================
+
+# --- Resource: the single net-new card --------------------------------------
+# (HACS adds this automatically when installed; keep for YAML-mode dashboards.)
+resources:
+  - url: /hacsfiles/flex-table-card/flex-table-card.js
+    type: module
+  # Optional existing GitHub cards from Data Sources.md (only if you use them):
+  # - url: /community_plugin/github-flexi-card/github-flexi-card.js
+  #   type: module
+  # - url: /community_plugin/github-card/github-card.js
+  #   type: js
+
+title: GitHub
+views:
+  # ==========================================================================
+  # VIEW 0 — Overview (default). All accounts, one table + attention + feed.
+  # ==========================================================================
+  - title: Overview
+    path: github_overview
+    icon: mdi:view-dashboard-outline
+    badges: []
+    cards:
+      # -- Attention read: totals across all accounts -------------------------
+      - type: grid
+        columns: 4
+        square: false
+        cards:
+          - type: tile
+            entity: sensor.github_total_open_pulls
+            name: Open PRs
+            icon: mdi:source-pull
+            color: var(--info-color)
+          - type: tile
+            entity: sensor.github_total_open_issues
+            name: Open issues
+            icon: mdi:chart-donut-variant
+            color: var(--warning-color)
+          - type: tile
+            entity: sensor.github_total_stars
+            name: Total stars
+            icon: mdi:star-four-points
+          # Attention tile: shows only when something needs a look.
+          - type: tile
+            entity: sensor.github_attention
+            name: Needs attention
+            icon: mdi:alert-circle-outline
+            color: var(--error-color)
+
+      # -- Repository registry: ALL accounts in one table -----------------------
+      # sortable by header; rows click through to GitHub. Hidden `url` column is
+      # referenced by the repo-name column's tap_action (col[1]).
+      - type: custom:flex-table-card
+        title: Repositories
+        entities:
+          include: sensor.*_repo
+        strict: true
+        enable_search: true
+        sort_by: -open_pulls
+        max_rows: 100
+        columns:
+          - data: repository
+            name: Repository
+            id: repository
+            icon: mdi:github
+            tap_action:
+              action: url
+              url_path: col[1]
+            align: left
+          - data: url
+            id: url
+            hidden: true
+          - data: account
+            name: Account
+            id: account
+            align: left
+          - data: open_pulls
+            name: PR
+            id: open_pulls
+            align: right
+          - data: open_issues
+            name: Issues
+            id: open_issues
+            align: right
+          - data: stars
+            name: Stars
+            id: stars
+            align: right
+          - data: forks
+            name: Forks
+            id: forks
+            align: right
+          - data: ci
+            name: CI
+            id: ci
+            align: center
+          - data: latest_release
+            name: Release
+            id: latest_release
+          - data: pushed_at
+            name: Pushed
+            id: pushed_at
+            fmt: time_passed
+
+      # -- Per-account activity feeds ------------------------------------------
+      - type: horizontal-stack
+        cards:
+          - type: markdown
+            title: Personal — recent activity
+            content: "{{ state_attr('sensor.personal_recent_activity', 'feed') | default(states('sensor.personal_recent_activity')) }}"
+          - type: markdown
+            title: Work — recent activity
+            content: "{{ state_attr('sensor.work_recent_activity', 'feed') | default(states('sensor.work_recent_activity')) }}"
+
+# ======================================================================
+  # VIEW 1 — Personal account
+  # ======================================================================
+  - title: Personal
+    path: personal
+    icon: mdi:account-heart-outline
+    badges: []
+    cards:
+      - type: markdown
+        title: Personal
+        content: >
+          ### Personal repositories
+          @personal ·
+          [Open on GitHub](https://github.com/) <!-- synthetic -->
+          · <small>synthetic demo data</small>
+
+      # -- Repo registry scoped to this account ---------------------------
+      - type: custom:flex-table-card
+        title: Repositories
+        id: repo_table_personal
+        entities:
+          include: sensor.personal_.*_repo
+        strict: true
+        enable_search: true
+        sort_by: -open_pulls
+        columns:
+          - id: repository
+            data: repository
+            icon: mdi:github
+            tap_action: url
+            url_path: col[1]
+          - data: url
+            id: url
+            hidden: true
+          - data: open_pulls
+            name: PR
+          - data: open_issues
+            name: Issues
+          - data: stars
+            name: Stars
+          - data: ci
+            name: CI
+
+      # -- Per-repo detail ------------------------------------------------
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            title: Home Assistant Config
+            content: >
+              **Repo** ·
+              [Open on GitHub](https://github.com/petepsa/homeassistant-config)
+              <!-- synthetic -->
+
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: tile
+                entity: sensor.personal_homeassistant_config_open_pulls
+                icon: mdi:source-pull
+              - type: tile
+                entity: sensor.personal_homeassistant_config_open_issues
+                icon: mdi:chart-dot-variant
+              - type: tile
+                entity: sensor.personal_homeassistant_config_stars
+                icon: mdi:star
+              - type: tile
+                entity: binary_sensor.personal_homeassistant_config_ci_ok
+                name: CI
+                icon: mdi:check-circle-outline
+
+          - type: markdown
+            title: Modules
+            content: >
+              ▶ [GitHub](https://github.com/petepsa/homeassistant-config)
+              · **PyPI** · **Render** · **Railway**
+              <!--
+                Modules row is driven by presence of a module entity. When
+                the integration exposes a module sensor (PyPI, Render,
+                Railway) this row grows automatically — no card change
+                required.
+              -->
+
+          - type: markdown
+            title: Release + activity
+            content: >
+              **Latest release:** {{ states('sensor.personal_homeassistant_config_latest_release') }}
+              ({{ states('sensor.personal_homeassistant_config_release_date') }})
+              · pushed {{ states('sensor.personal_homeassistant_config_pushed_at') }}
+              · {{ state_attr('sensor.personal_recent_activity', 'feed') | default(states('sensor.personal_recent_activity')) }}
+
+  # ======================================================================
+  # VIEW 2 — Work account (example; duplicate for each additional account)
+  # ======================================================================
+  - title: Work
+    path: work
+    icon: mdi:briefcase-outline
+    badges: []
+    cards:
+      - type: markdown
+        title: Work
+        content: "### Work repositories — synthetic demo data"
+
+      - type: custom:flex-table-card
+        title: Repositories
+        id: repo_table_work
+        entities:
+          include: sensor.work_.*_repo
+        strict: true
+        enable_search: true
+        sort_by: -open_pulls
+        columns:
+          - id: repository
+            data: repository
+            icon: mdi:github
+            tap_action: url
+            url_path: col[1]
+          - data: url
+            id: url
+            hidden: true
+          - data: open_pulls
+            name: PRs
+          - data: open_issues
+            name: Issues
+          - data: stars
+            name: Stars
+          - data: ci
+            name: CI
+
+      - type: markdown
+        content: "{{ states('sensor.work_recent_activity') }}"

@@ -12,6 +12,11 @@ to the HACS default store — Validation must stay green.
 - `custom_components/devops_bridge/` — the integration: `api.py`, `coordinator.py`,
   `config_flow.py`, `sensor.py`, `binary_sensor.py`, `entity.py`, `const.py`,
   `diagnostics.py`, plus `translations/en.json` and `brand/`.
+- `dashboard/` — the published copy of the Lovelace dashboard deliverable:
+  `GithubDashboard.yaml` (the **authoritative entity contract**),
+  `TemplateSensors.yaml`, `README.md` (install guide), `screenshots/`. Authored
+  in the private Obsidian vault (`github/`), mirrored here so GitHub users can
+  reach it; keep the two in sync.
 - `tests/` — pytest suite using mocked HTTP (aioresponses); no live GitHub needed.
 - `.github/workflows/` — `ci.yaml` (ruff + mypy + pytest) and `validate.yaml`
   (hassfest + HACS Action, strict).
