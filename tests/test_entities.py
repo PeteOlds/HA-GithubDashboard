@@ -104,7 +104,9 @@ async def test_ci_binary_sensor_unavailable_while_idle(mock_hass, client):
     assert sensor.available is False
 
 
-async def test_recent_activity_state_bounded_and_attr_holds_full_feed(mock_hass, client):
+async def test_recent_activity_state_bounded_and_attr_holds_full_feed(
+    mock_hass, client
+):
     """State must fit HA's 255-char cap; the full markdown lives in `feed`."""
     from custom_components.devops_bridge.sensor import AccountActivitySensor
 

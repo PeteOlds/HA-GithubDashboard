@@ -30,7 +30,7 @@ from .conftest import (
 URL_EVENTS = re.compile(r"https://api\.github\.com/users/octocat/events/public.*")
 
 
-def make_entry(mock_hass, repos=None):
+def make_entry(mock_hass, repos=None, options=None):
     from homeassistant.config_entries import ConfigEntry
 
     data = {
@@ -47,7 +47,7 @@ def make_entry(mock_hass, repos=None):
         data=data,
         source="user",
         entry_id="test-entry",
-        options={},
+        options=options or {},
         minor_version=1,
         discovery_keys={},
         subentries_data=None,
@@ -91,6 +91,32 @@ async def test_coordinator_refresh_repo(mock_hass, client):
     assert repo.open_pulls == 1
     assert repo.latest_release == "v1.0.0"
     assert "PushEvent" in data.activity
+
+
+async def test_coordinator_options_repos_take_precedence(mock_hass, client):
+    """Repos set via the options flow (entry.options) override entry.data.
+
+    Regression: the options flow writes the new repo selection to entry.options,
+    so the coordinator must prefer options over the initial data list, or
+    adding a repo via Options is never reflected in the UI.
+    """
+    entry = make_entry(
+        mock_hass,
+        repos=["octocat/Hello-World"],
+        options={
+            CONF_REPOS: ["octocat/Hello-World", "octocat/github-linguist"],
+            CONF_REPO_MAP: {
+                "octocat/Hello-World": "hello_world",
+                "octocat/github-linguist": "github_linguist",
+            },
+        },
+    )
+    coordinator = DevopsBridgeCoordinator(mock_hass, entry, client, "work")
+    assert coordinator.repos == [
+        "octocat/Hello-World",
+        "octocat/github-linguist",
+    ]
+    assert coordinator.repo_slug("octocat/github-linguist") == "github_linguist"
 
 
 async def test_coordinator_rate_limit(mock_hass, client):

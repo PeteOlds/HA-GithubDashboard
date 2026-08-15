@@ -57,8 +57,12 @@ class DevopsBridgeCoordinator(DataUpdateCoordinator[DevopsBridgeData]):
     ) -> None:
         self.client = client
         self.account_slug = account_slug
-        self.repos: list[str] = list(entry.data.get(CONF_REPOS, []))
-        self._repo_slugs: dict[str, str] = dict(entry.data.get(CONF_REPO_MAP, {}))
+        self.repos: list[str] = list(
+            entry.options.get(CONF_REPOS, entry.data.get(CONF_REPOS, []))
+        )
+        self._repo_slugs: dict[str, str] = dict(
+            entry.options.get(CONF_REPO_MAP, entry.data.get(CONF_REPO_MAP, {}))
+        )
         self._login: str = entry.data.get(CONF_LOGIN, "")
         interval_int: int = entry.options.get(
             CONF_UPDATE_INTERVAL, UPDATE_INTERVAL.seconds // 60
