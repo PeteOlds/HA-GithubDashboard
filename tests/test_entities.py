@@ -104,6 +104,27 @@ async def test_ci_binary_sensor_unavailable_while_idle(mock_hass, client):
     assert sensor.available is False
 
 
+async def test_recent_activity_state_bounded_and_attr_holds_full_feed(mock_hass, client):
+    """State must fit HA's 255-char cap; the full markdown lives in `feed`."""
+    from custom_components.devops_bridge.sensor import AccountActivitySensor
+
+    entry = _entry(mock_hass)
+    coordinator = DevopsBridgeCoordinator(mock_hass, entry, client, "work")
+    long_feed = "\n".join(
+        f"- `octocat/Hello-World` · PushEvent · 2026-05-01 12:00 commit {i}"
+        for i in range(20)
+    )
+    coordinator.data = DevopsBridgeData(activity=long_feed)
+    coordinator.last_update_success = True
+
+    sensor = AccountActivitySensor(coordinator, "work")
+    assert sensor.entity_id == "sensor.work_recent_activity"
+    assert len(sensor.state) <= 255
+    assert sensor.state.endswith("…")
+    assert sensor.extra_state_attributes["feed"] == long_feed
+    assert "last_updated" in sensor.extra_state_attributes
+
+
 def _entry(mock_hass):
     from homeassistant.config_entries import ConfigEntry
 

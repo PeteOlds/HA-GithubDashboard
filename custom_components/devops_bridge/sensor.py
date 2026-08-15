@@ -11,7 +11,7 @@ Entities are read-only; the only action in the dashboard is `tap_action: url`.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -56,6 +56,8 @@ _DESCRIPTION_NAMES: dict[str, str] = {
 }
 
 _TIMESTAMP_KEYS = {"release_date", "pushed_at"}
+
+_FEED_STATE_LIMIT = 200
 
 
 def _parse_timestamp(value: str) -> datetime | None:
@@ -158,9 +160,24 @@ class AccountActivitySensor(DevopsBridgeEntity, SensorEntity):
 
     @property
     def native_value(self) -> str:
+        """State is the feed truncated to fit HA's 255-char cap."""
         if self.coordinator.data is None:
             return ""
-        return self.coordinator.data.activity or ""
+        feed = self.coordinator.data.activity or ""
+        if len(feed) <= _FEED_STATE_LIMIT:
+            return feed
+        return f"{feed[:_FEED_STATE_LIMIT]}…"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, str]:
+        """Full markdown feed + ISO timestamp of the update."""
+        if self.coordinator.data is None or not self.coordinator.last_update_success:
+            return {}
+
+        return {
+            "feed": self.coordinator.data.activity or "",
+            "last_updated": datetime.now(UTC).isoformat(),
+        }
 
 
 async def async_setup_entry(
