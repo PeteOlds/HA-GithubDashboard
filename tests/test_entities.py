@@ -63,23 +63,25 @@ async def test_summary_sensor_attributes(mock_hass, client):
 
 
 async def test_ci_binary_sensor_ok(mock_hass, client):
+    """A passing CI is OFF — device_class:problem renders OFF as "OK"."""
     entry = _entry(mock_hass)
     coordinator = DevopsBridgeCoordinator(mock_hass, entry, client, "work")
     coordinator.data = DevopsBridgeData(repos={REPO_KEYS[0]: build_repo(ci=CI_OK)})
 
     sensor = RepoCISensor(coordinator, REPO_KEYS[0])
     assert sensor.entity_id == "binary_sensor.work_hello_world_ci_ok"
-    assert sensor.is_on is True
+    assert sensor.is_on is False
     assert sensor.available is True
 
 
 async def test_ci_binary_sensor_fail(mock_hass, client):
+    """A failing CI is ON — the problem state."""
     entry = _entry(mock_hass)
     coordinator = DevopsBridgeCoordinator(mock_hass, entry, client, "work")
     coordinator.data = DevopsBridgeData(repos={REPO_KEYS[0]: build_repo(ci=CI_FAIL)})
 
     sensor = RepoCISensor(coordinator, REPO_KEYS[0])
-    assert sensor.is_on is False
+    assert sensor.is_on is True
     assert sensor.available is True
 
 

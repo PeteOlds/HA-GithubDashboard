@@ -2,7 +2,8 @@
 
 Implements the CI contract from ENTITY_CONTRACT.md:
 - `binary_sensor.{account}_{repo}_ci_ok`
-- `on` = CI passing, `off` = CI failing.
+- `device_class: problem` — HA renders ON as the problem/alert state (it does NOT
+  invert), so `on` = CI **failing**, `off` = CI passing ("OK").
 - `unavailable` while `running` or `idle` (never a false "fail").
 - `idle` covers Actions absent, disabled, or not yet run.
 """
@@ -49,9 +50,13 @@ class RepoCISensor(RepoDeviceEntity, BinarySensorEntity):
 
     @property
     def is_on(self) -> bool:
-        """True (on) when CI passes. `device_class: PROBLEM` inverts display."""
+        """True (on) when CI fails — the `PROBLEM` state.
+
+        `device_class: problem` renders ON as a problem, so `on` must mean a
+        CI failure; a passing CI is OFF (renders "OK").
+        """
         repo = self._repo
-        return bool(repo and repo.ci == CI_OK)
+        return bool(repo and repo.ci == CI_FAIL)
 
 
 async def async_setup_entry(
