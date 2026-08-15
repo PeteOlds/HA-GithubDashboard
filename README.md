@@ -55,8 +55,8 @@ config entry and never logged or committed.
 3. Under **Permissions** set exactly these to **Read-only** (all others stay at
    *No access*): Actions, Contents, Issues, Pull requests, Metadata.
 4. **Generate token** and copy it immediately — GitHub shows it only once.
-5. In HA: Settings → Devices & services → **Add integration** → **DevOps
-   Bridge**, enter the account name, paste the token, select repos.
+5. In HA: Settings → Devices & services → **Add integration** → **GitHub Repo
+   Monitor**, enter the account name, paste the token, select repos.
 
 ### Adjusting later
 
@@ -89,8 +89,8 @@ without rebuilding:
 docker run -d \
   --name ha-dev --restart unless-stopped \
   -p 9123:8123 \
-  -v /mnt/General/ha-dev/config:/config \
-  -v /mnt/General/OpenCode/HA-GithubDashboard/custom_components/devops_bridge:/config/custom_components/devops_bridge \
+  -v /path/to/ha-dev/config:/config \
+  -v /path/to/HA-GithubDashboard/custom_components/devops_bridge:/config/custom_components/devops_bridge \
   -e TZ=Pacific/Auckland \
   ghcr.io/home-assistant/home-assistant:stable
 ```
